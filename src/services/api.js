@@ -1,22 +1,31 @@
 // Replace with your actual deployed Apps Script URL if needed.
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2xK3BKmD-G0nPldJNivkC9WCRp4JJRbzBftghbgOq2YKDF56g5mR_K08-Hs6Joho/exec';
 
-export const saveAssessment = async (data) => {
+export const saveAssessment = async (payload) => {
     try {
+        const { patientInfo, assessmentData } = payload;
+
+        // Flatten the data since Google Sheets usually expects a flat row of columns
+        const flatData = {
+            ...patientInfo,
+            ...assessmentData
+        };
+
+        const params = new URLSearchParams();
+        for (const [key, value] of Object.entries(flatData)) {
+            // Append each field as a form parameter
+            if (value !== undefined && value !== null) {
+                params.append(key, value);
+            }
+        }
+
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                action: 'submitAssessment',
-                data: data
-            }),
-            // no-cors is often needed for simple apps script deployments if CORS isn't explicitly handled
-            mode: 'no-cors'
+            body: params, // Automatically sets to application/x-www-form-urlencoded
+            mode: 'no-cors' // Prevent CORS preflight errors
         });
 
-        // With no-cors, we can't read the response. We assume success if it doesn't throw.
+        // no-cors returns a response with type "opaque", so we assume success if no JS throw.
         return { success: true };
     } catch (error) {
         console.error("Error saving assessment:", error);
