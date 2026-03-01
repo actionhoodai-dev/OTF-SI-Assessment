@@ -39,7 +39,7 @@ export const generatePDF = (patientInfo, assessmentData) => {
     doc.text(`2. DATE OF BIRTH: ${patientInfo.dob || ''}`, startX, yPos);
     doc.text(`5. INFORMANT: ${patientInfo.informant || ''}`, col2X, yPos);
     yPos += 7;
-    doc.text(`3. AGE & SEX: ${patientInfo.ageSex || ''}`, startX, yPos);
+    doc.text(`3. AGE: ${patientInfo.age || ''}     SEX: ${patientInfo.sex || ''}`, startX, yPos);
     yPos += 7;
     const addressLines = doc.splitTextToSize(`6. ADDRESS: ${patientInfo.address || ''}`, 180);
     doc.text(addressLines, startX, yPos);

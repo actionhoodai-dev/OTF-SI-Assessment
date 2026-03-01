@@ -49,7 +49,29 @@ const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
 const PatientIntakeForm = ({ patientInfo, setPatientInfo, onNext }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setPatientInfo(prev => ({ ...prev, [name]: value }));
+        const updates = { [name]: value };
+
+        if (name === 'dob' && value) {
+            const birthDate = new Date(value);
+            const today = new Date();
+            let ageInYears = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                ageInYears--;
+            }
+            if (ageInYears <= 0) {
+                let months = today.getMonth() - birthDate.getMonth() +
+                    (12 * (today.getFullYear() - birthDate.getFullYear()));
+                if (today.getDate() < birthDate.getDate()) {
+                    months--;
+                }
+                updates.age = `${Math.max(0, months)} m`;
+            } else {
+                updates.age = `${ageInYears} y`;
+            }
+        }
+
+        setPatientInfo(prev => ({ ...prev, ...updates }));
     };
 
     const handleSubmit = (e) => {
@@ -75,8 +97,17 @@ const PatientIntakeForm = ({ patientInfo, setPatientInfo, onNext }) => {
                         <input required type="date" name="dob" value={patientInfo.dob || ''} onChange={handleChange} />
                     </div>
                     <div>
-                        <label className="text-bold text-sm" style={{ display: 'block', marginBottom: '0.5rem' }}>Age & Sex</label>
-                        <input required type="text" name="ageSex" value={patientInfo.ageSex || ''} onChange={handleChange} placeholder="e.g. 5 M" />
+                        <label className="text-bold text-sm" style={{ display: 'block', marginBottom: '0.5rem' }}>Age</label>
+                        <input required type="text" name="age" value={patientInfo.age || ''} onChange={handleChange} placeholder="Auto-fills from DOB" />
+                    </div>
+                    <div>
+                        <label className="text-bold text-sm" style={{ display: 'block', marginBottom: '0.5rem' }}>Sex</label>
+                        <select required name="sex" value={patientInfo.sex || ''} onChange={handleChange}>
+                            <option value="" disabled>Select...</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                     <div>
                         <label className="text-bold text-sm" style={{ display: 'block', marginBottom: '0.5rem' }}>Informant</label>
