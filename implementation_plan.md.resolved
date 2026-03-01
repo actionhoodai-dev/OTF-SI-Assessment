@@ -1,0 +1,42 @@
+# Implementation Plan - OTF SI Assessment Web App
+
+## 1. Project Overview
+A professional, digitized version of the "OTF SI INVENTORY" for occupational therapists. The app will manage patient data, record clinical observations (YES/NO), maintain history, and generate PDFs.
+
+## 2. Tech Stack
+- **Frontend**: React (Vite) for a fast, responsive UI.
+- **Styling**: Vanilla CSS with modern aesthetics (Glassmorphism, Navy/Professional palette).
+- **Backend/Database**: Google Sheets via Google Apps Script (URL provided).
+- **PDF Generation**: Client-side (using `jspdf` or similar) or server-side via Apps Script.
+
+## 3. Data Schema (Google Sheets)
+### Patients Sheet
+| Patient ID | Name | DOB | Age | Sex | Informant | Address | Chief Complaints |
+|------------|------|-----|-----|-----|-----------|---------|------------------|
+
+### Assessments Sheet
+| Assessment ID | Patient ID | Date | Therapist | TACTILE_Dressing_Q1 | ... | TACTILE_Comments | ... | PDF Link |
+|---------------|------------|------|-----------|--------------------|-----|------------------|-----|----------|
+
+## 4. UI Components
+- **Dashboard**: Search/Select patient, Add New Patient button.
+- **Assessment Form**:
+    - Sticky Section Navigation.
+    - Collapsible Cards for Subsections.
+    - YES/NO Toggle Buttons (Large, high-contrast).
+    - Section Comments Area.
+- **History View**: List of past assessments for a selected patient.
+- **PDF Preview**: Professional medical report layout.
+
+## 5. Development Steps
+1. **Setup**: Initialize Vite + React project.
+2. **Data Layer**: Define the assessment questions structure from the reference text.
+3. **Services**: Implement API client for Google Apps Script.
+4. **State Management**: Implement auto-save and local persistence.
+5. **UI Implementation**:
+    - Layout & Design System (CSS).
+    - Patient Intake Form.
+    - Assessment Form (Dynamic generation from data structure).
+    - History Page.
+6. **PDF Generation**: Standardize the report format.
+7. **Final Polish**: Performance optimization and responsive testing.
