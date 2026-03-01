@@ -62,7 +62,7 @@ export const saveAssessment = async (payload) => {
                 subsection.questions.forEach(q => {
                     const key = `${secId}_${subId}_${q.id}`;
                     const answer = assessmentData[key] || 'Not Answered';
-                    results.push(`${q.id}: ${answer}`);
+                    results.push(`${q.text}: ${answer}`);
                 });
                 return results.join('\n');
             };
