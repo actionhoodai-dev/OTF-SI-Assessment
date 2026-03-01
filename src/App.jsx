@@ -8,7 +8,7 @@ const Header = () => (
     <header className="app-nav">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <Activity size={28} />
-            <h1 style={{ color: 'white', margin: 0, fontSize: '1.5rem' }}>OTF SI Inventory Assessment</h1>
+            <h1 style={{ color: 'white', margin: 0, fontSize: '1.5rem' }}>OTF SI Assessment</h1>
         </div>
     </header>
 );
