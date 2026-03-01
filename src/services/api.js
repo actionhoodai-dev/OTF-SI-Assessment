@@ -32,3 +32,15 @@ export const saveAssessment = async (payload) => {
         throw error;
     }
 };
+export const fetchPatients = async () => {
+    try {
+        const response = await fetch(`${APPS_SCRIPT_URL}?action=getPatients`);
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.warn("Could not fetch patients remotely:", error);
+        // Return dummy data or rely on local storage cache if we're unable to hit Google successfully due to CORS
+        const local = localStorage.getItem('otf_patients');
+        return local ? JSON.parse(local) : [];
+    }
+};

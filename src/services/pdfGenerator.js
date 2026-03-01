@@ -33,7 +33,7 @@ export const generatePDF = (patientInfo, assessmentData) => {
     const startX = 14;
     const col2X = 105;
 
-    doc.text(`1. NAME: ${patientInfo.name || ''}`, startX, yPos);
+    doc.text(`1. NAME: ${patientInfo.name || ''}   (ID: ${patientInfo.patientId || ''})`, startX, yPos);
     doc.text(`4. DATE OF ASSESSMENT: ${patientInfo.assessmentDate || ''}`, col2X, yPos);
     yPos += 7;
     doc.text(`2. DATE OF BIRTH: ${patientInfo.dob || ''}`, startX, yPos);
@@ -81,7 +81,7 @@ export const generatePDF = (patientInfo, assessmentData) => {
                 let checkNo = '';
 
                 if (selection === 'YES') {
-                    checkYes = 'v';
+                    checkYes = 'x';
                 } else if (selection === 'NO') {
                     checkNo = 'x';
                 }

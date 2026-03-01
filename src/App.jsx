@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ASSESSMENT_STRUCTURE } from './data/assessmentData';
-import { saveAssessment } from './services/api';
+import { saveAssessment, fetchPatients } from './services/api';
 import { downloadPDF } from './services/pdfGenerator';
 import { ChevronDown, ChevronRight, Save, FileText, CheckCircle, Search, PlusCircle, Activity } from 'lucide-react';
 
@@ -14,13 +14,41 @@ const Header = () => (
 );
 
 const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [patients, setPatients] = useState([]);
+
+    useEffect(() => {
+        fetchPatients().then(data => {
+            if (Array.isArray(data)) setPatients(data);
+        });
+    }, []);
+
+    const filteredPatients = patients.filter(p => {
+        if (!searchQuery) return false;
+        const q = searchQuery.toLowerCase();
+        const idMatch = p.patientId && p.patientId.toLowerCase().includes(q);
+        const nameMatch = p.name && p.name.toLowerCase().includes(q);
+        return idMatch || nameMatch;
+    }).slice(0, 5); // limit to 5 most relevant
+
+    const handleNewClick = () => {
+        let max = 99; // Defaults to starting next at 100 if none exist (SI100)
+        patients.forEach(p => {
+            if (p.patientId && p.patientId.startsWith('SI')) {
+                const num = parseInt(p.patientId.replace('SI', ''), 10);
+                if (!isNaN(num) && num > max) max = num;
+            }
+        });
+        onNewPatient(`SI${max + 1}`);
+    };
+
     return (
         <div className="container" style={{ marginTop: '2rem' }}>
             <div className="card text-center animate-fade-in" style={{ maxWidth: '600px', margin: '0 auto', padding: '3rem' }}>
                 <h2 className="section-title text-center" style={{ borderBottom: 'none', marginBottom: '2rem' }}>Patient Dashboard</h2>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <button className="btn btn-primary" onClick={onNewPatient} style={{ fontSize: '1.2rem', padding: '1rem' }}>
+                    <button className="btn btn-primary" onClick={handleNewClick} style={{ fontSize: '1.2rem', padding: '1rem' }}>
                         <PlusCircle style={{ marginRight: '0.5rem' }} /> Start New Assessment
                     </button>
 
@@ -32,13 +60,37 @@ const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
                         }}>OR</span>
                     </div>
 
-                    <div style={{ position: 'relative' }}>
-                        <Search style={{ position: 'absolute', top: '50%', left: '1rem', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={20} />
+                    <div style={{ position: 'relative', textAlign: 'left' }}>
+                        <Search style={{ position: 'absolute', top: '15px', left: '1rem', color: 'var(--text-muted)' }} size={20} />
                         <input
                             type="text"
-                            placeholder="Search existing patients..."
-                            style={{ paddingLeft: '3rem', fontSize: '1.1rem' }}
+                            placeholder="Search existing patients by Name or ID..."
+                            style={{ paddingLeft: '3rem', fontSize: '1.1rem', width: '100%' }}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
+                        {filteredPatients.length > 0 && (
+                            <div style={{
+                                position: 'absolute', top: '100%', left: 0, right: 0,
+                                background: 'white', border: '1px solid var(--border)',
+                                borderRadius: 'var(--radius-md)', zIndex: 10, marginTop: '5px',
+                                boxShadow: 'var(--shadow-md)'
+                            }}>
+                                {filteredPatients.map((p, idx) => (
+                                    <div
+                                        key={idx}
+                                        style={{ padding: '10px 15px', borderBottom: idx < filteredPatients.length - 1 ? '1px solid #f0f0f0' : 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}
+                                        onClick={() => onSelectPatient(p)}
+                                    >
+                                        <strong style={{ color: 'var(--primary-color)' }}>{p.patientId}</strong>
+                                        <span>{p.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {searchQuery && filteredPatients.length === 0 && (
+                            <div style={{ marginTop: '10px', color: 'var(--text-muted)', textAlign: 'center' }}>No relevant patients found.</div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -84,6 +136,10 @@ const PatientIntakeForm = ({ patientInfo, setPatientInfo, onNext }) => {
             <h2 className="section-title">Demographic Data</h2>
             <form onSubmit={handleSubmit}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                    <div>
+                        <label className="text-bold text-sm" style={{ display: 'block', marginBottom: '0.5rem' }}>Patient ID</label>
+                        <input required type="text" name="patientId" value={patientInfo.patientId || ''} onChange={handleChange} placeholder="e.g. SI101" />
+                    </div>
                     <div>
                         <label className="text-bold text-sm" style={{ display: 'block', marginBottom: '0.5rem' }}>Name</label>
                         <input required type="text" name="name" value={patientInfo.name || ''} onChange={handleChange} />
@@ -243,10 +299,17 @@ export default function App() {
         }
     }, []);
 
-    const handleStartNew = () => {
+    const handleStartNew = (patientId) => {
         const today = new Date().toISOString().split('T')[0];
-        setPatientInfo({ assessmentDate: today });
+        setPatientInfo({ patientId: patientId || '', assessmentDate: today });
         setAssessmentData({});
+        setView('intake');
+    };
+
+    const handleSelectPatient = (patient) => {
+        const today = new Date().toISOString().split('T')[0];
+        setPatientInfo({ ...patient, assessmentDate: today });
+        setAssessmentData({}); // Ready for new assessment with existing demographic
         setView('intake');
     };
 
@@ -291,7 +354,10 @@ export default function App() {
             <Header />
 
             {view === 'dashboard' && (
-                <PatientManagement onNewPatient={handleStartNew} />
+                <PatientManagement
+                    onSelectPatient={handleSelectPatient}
+                    onNewPatient={handleStartNew}
+                />
             )}
 
             {view === 'intake' && (
