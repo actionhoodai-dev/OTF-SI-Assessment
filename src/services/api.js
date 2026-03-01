@@ -1,3 +1,5 @@
+import { ASSESSMENT_STRUCTURE } from '../data/assessmentData';
+
 // Replace with your actual deployed Apps Script URL if needed.
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2xK3BKmD-G0nPldJNivkC9WCRp4JJRbzBftghbgOq2YKDF56g5mR_K08-Hs6Joho/exec';
 
@@ -49,16 +51,20 @@ export const saveAssessment = async (payload) => {
             tData["Self_Injurious"] = { value: "", comment: assessmentData["TACTILE_Self-Injurious Behaviors_Comments"] || "" };
 
             // Note: In our frontend, we have YES/NO on EACH QUESTION, not each SUBSECTION. 
-            // But the backend apps script only has ONE column for the entire subsection's "value", and ONE for "comment".
-            // We will compress the YES questions into the "value" column to align with the provided backend script constraint!
+            // The optimal map is to provide the full list of Yes/No/Not Answered for each question within the single subsection cell.
             const compressQ = (secId, subId) => {
-                const yesAnswers = [];
-                Object.keys(assessmentData).forEach(k => {
-                    if (k.startsWith(`${secId}_${subId}_Q`) && assessmentData[k] === 'YES') {
-                        yesAnswers.push(k.split('_Q')[1]); // Push Q number
-                    }
+                const section = ASSESSMENT_STRUCTURE.find(s => s.id === secId);
+                if (!section) return "";
+                const subsection = section.subsections.find(s => s.id === subId);
+                if (!subsection) return "";
+
+                const results = [];
+                subsection.questions.forEach(q => {
+                    const key = `${secId}_${subId}_${q.id}`;
+                    const answer = assessmentData[key] || 'Not Answered';
+                    results.push(`${q.id}: ${answer}`);
                 });
-                return yesAnswers.length > 0 ? `Yes on Qs: ${yesAnswers.join(',')}` : 'None';
+                return results.join('\n');
             };
 
             tData["Dressing"].value = compressQ('TACTILE', 'Dressing');
