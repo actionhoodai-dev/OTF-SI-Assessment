@@ -96,9 +96,13 @@ const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
     const handleNewClick = () => {
         let max = 99; // Defaults to starting next at 100 if none exist (SI100)
         uniquePatients.forEach(p => {
-            if (p.patientId && p.patientId.toUpperCase().startsWith('SI')) {
-                const num = parseInt(p.patientId.toUpperCase().replace('SI', ''), 10);
-                if (!isNaN(num) && num > max) max = num;
+            if (p.patientId) {
+                // Find any digits inside the ID string
+                const match = p.patientId.match(/\d+/);
+                if (match) {
+                    const num = parseInt(match[0], 10);
+                    if (!isNaN(num) && num > max) max = num;
+                }
             }
         });
         onNewPatient(`SI${max + 1}`);
