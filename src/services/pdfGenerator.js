@@ -100,7 +100,7 @@ export const generatePDF = (patientInfo, assessmentData) => {
                 {
                     content: `Comments: ${commentData || ''}`,
                     colSpan: 3,
-                    styles: { fontStyle: 'italic', fillColor: [248, 249, 250] }
+                    styles: { fontStyle: 'italic', fillColor: [248, 249, 250], halign: 'left' }
                 }
             ]);
 
@@ -115,9 +115,10 @@ export const generatePDF = (patientInfo, assessmentData) => {
                     1: { cellWidth: 15, halign: 'center', fontStyle: 'bold' },
                     2: { cellWidth: 15, halign: 'center', fontStyle: 'bold' }
                 },
-                styles: { fontSize: 9, cellPadding: 3 },
+                styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
                 margin: { left: 14, right: 14 },
-                pageBreak: 'auto'
+                pageBreak: 'auto',
+                rowPageBreak: 'avoid' // This strictly prevents questions from slicing across two pages
             });
 
             yPos = doc.lastAutoTable.finalY + 8;
