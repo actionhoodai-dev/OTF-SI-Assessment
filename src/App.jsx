@@ -53,7 +53,7 @@ const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
     patients.forEach(p => {
         const pId = p.Patient_ID || p.patientId || '';
         const name = p.Name || p.name || '';
-        const dob = p.DOB || p.dob || '';
+        const dob = (p.DOB || p.dob || '').split('T')[0];
         let ageSex = p.Age_Sex || p.ageSex || '';
         const address = p.Address || p.address || '';
         const informant = p.Informant || p.informant || '';
@@ -219,9 +219,9 @@ const PatientHistory = ({ setView }) => {
         const patientInfo = {
             patientId: row["Patient_ID"] || row["patientId"] || '',
             name: row["Name"] || row["name"] || '',
-            dob: row["DOB"] || row["dob"] || '',
+            dob: (row["DOB"] || row["dob"] || '').split('T')[0],
             ageSex: row["Age_Sex"] || row["ageSex"] || '',
-            assessmentDate: row["Assessment_Date"] || row["assessmentDate"] || '',
+            assessmentDate: (row["Assessment_Date"] || row["assessmentDate"] || '').split('T')[0],
             informant: row["Informant"] || row["informant"] || '',
             address: row["Address"] || row["address"] || '',
             chiefComplaints: row["Chief_Complaints"] || row["chiefComplaints"] || ''
