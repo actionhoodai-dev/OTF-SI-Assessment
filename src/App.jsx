@@ -30,6 +30,9 @@ const Header = ({ setView }) => {
                     <div className="menu-item" onClick={() => { setView('dashboard'); setMenuOpen(false); }}>
                         Home / Dashboard
                     </div>
+                    <div className="menu-item" onClick={() => { setView('history'); setMenuOpen(false); }}>
+                        Patient History
+                    </div>
                 </div>
             )}
         </header>
@@ -131,6 +134,195 @@ const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
                         </div>
                     )}
                 </div>
+            </div>
+        </div>
+    );
+};
+
+const PatientHistory = ({ setView }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [patients, setPatients] = useState([]);
+    const [selectedPatient, setSelectedPatient] = useState(null);
+
+    useEffect(() => {
+        fetchPatients().then(data => {
+            if (Array.isArray(data)) setPatients(data);
+        });
+    }, []);
+
+    // We filter rows down to unique patients for the search bar
+    const uniquePatientsMap = new Map();
+    patients.forEach(p => {
+        const pId = p.Patient_ID || p.patientId || '';
+        const name = p.Name || p.name || '';
+        if (pId) uniquePatientsMap.set(pId, { patientId: pId, name: name });
+    });
+    const uniquePatients = Array.from(uniquePatientsMap.values());
+
+    const filteredPatients = uniquePatients.filter(p => {
+        if (!searchQuery) return false;
+        const q = searchQuery.toLowerCase();
+        return (p.patientId && p.patientId.toLowerCase().includes(q)) ||
+            (p.name && p.name.toLowerCase().includes(q));
+    }).slice(0, 5);
+
+    const handleSelectPatient = (p) => {
+        // Find ALL assessments for this patient ID
+        const pId = p.patientId;
+        const matchingRows = patients.filter(row => (row.Patient_ID || row.patientId) === pId);
+        // Sort descending by Timestamp if available
+        matchingRows.sort((a, b) => new Date(b.Timestamp || 0) - new Date(a.Timestamp || 0));
+        setSelectedPatient({
+            info: p,
+            assessments: matchingRows
+        });
+        setSearchQuery('');
+    };
+
+    const parseHistoricalAssessment = (row) => {
+        const patientInfo = {
+            patientId: row["Patient_ID"] || row["patientId"] || '',
+            name: row["Name"] || row["name"] || '',
+            dob: row["DOB"] || row["dob"] || '',
+            ageSex: row["Age_Sex"] || row["ageSex"] || '',
+            assessmentDate: row["Assessment_Date"] || row["assessmentDate"] || '',
+            informant: row["Informant"] || row["informant"] || '',
+            address: row["Address"] || row["address"] || '',
+            chiefComplaints: row["Chief_Complaints"] || row["chiefComplaints"] || ''
+        };
+
+        if (patientInfo.ageSex) {
+            const parts = patientInfo.ageSex.split(' ');
+            if (parts.length >= 2) {
+                patientInfo.age = parts[0] + (parts[1].length === 1 ? ' ' + parts[1] : '');
+                patientInfo.sex = parts[parts.length - 1];
+            } else {
+                patientInfo.age = parts[0];
+            }
+        }
+
+        const assessmentData = {};
+        ASSESSMENT_STRUCTURE.forEach(section => {
+            section.subsections.forEach(sub => {
+                sub.questions.forEach(q => {
+                    const key = `${section.id}_${sub.id}_${q.id}`;
+                    let foundAnswer = 'Not Answered';
+                    Object.values(row).forEach(val => {
+                        if (typeof val === 'string') {
+                            if (val.includes(`${q.text}: YES`)) foundAnswer = 'YES';
+                            else if (val.includes(`${q.text}: NO`)) foundAnswer = 'NO';
+                        }
+                    });
+                    if (foundAnswer !== 'Not Answered') assessmentData[key] = foundAnswer;
+                });
+
+                const possibleCommentKey = Object.keys(row).find(k =>
+                    k.toLowerCase().includes(sub.id.toLowerCase().replace(/ /g, '_')) &&
+                    k.toLowerCase().includes('comment')
+                );
+                if (possibleCommentKey) {
+                    assessmentData[`${section.id}_${sub.id}_Comments`] = row[possibleCommentKey];
+                }
+            });
+        });
+
+        return { patientInfo, assessmentData };
+    };
+
+    const handleDownload = (row) => {
+        const { patientInfo, assessmentData } = parseHistoricalAssessment(row);
+        downloadPDF(patientInfo, assessmentData);
+    };
+
+    return (
+        <div className="container" style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <button className="btn btn-secondary" style={{ alignSelf: 'flex-start' }} onClick={() => setView('dashboard')}>
+                ← Back to Dashboard
+            </button>
+
+            <div className="card animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto', width: '100%', padding: '2rem' }}>
+                <h2 style={{ marginBottom: '1rem', color: 'var(--primary-color)', textAlign: 'center' }}>Patient History & Reports</h2>
+                <p className="text-muted text-center" style={{ marginBottom: '2rem' }}>Search any existing patient to view or redownload past assessment reports.</p>
+
+                {!selectedPatient && (
+                    <div style={{ position: 'relative', maxWidth: '600px', margin: '0 auto' }}>
+                        <Search style={{ position: 'absolute', top: '15px', left: '1rem', color: 'var(--text-muted)' }} size={20} />
+                        <input
+                            type="text"
+                            placeholder="Search by Patient ID or Name to view history..."
+                            style={{ paddingLeft: '3rem', fontSize: '1.1rem', width: '100%', borderRadius: '50px' }}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        {filteredPatients.length > 0 && (
+                            <div style={{
+                                position: 'absolute', top: '100%', left: 0, right: 0,
+                                background: 'white', border: '1px solid var(--border)',
+                                borderRadius: 'var(--radius-md)', zIndex: 10, marginTop: '8px',
+                                boxShadow: 'var(--shadow-lg)'
+                            }}>
+                                {filteredPatients.map((p, idx) => (
+                                    <div
+                                        key={idx}
+                                        style={{
+                                            padding: '12px 20px', borderBottom: idx < filteredPatients.length - 1 ? '1px solid #f0f0f0' : 'none',
+                                            cursor: 'pointer', display: 'flex', justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                        onClick={() => handleSelectPatient(p)}
+                                    >
+                                        <div>
+                                            <strong style={{ color: 'var(--primary-color)', display: 'block' }}>{p.patientId}</strong>
+                                            <span className="text-muted" style={{ fontSize: '0.9rem' }}>{p.name}</span>
+                                        </div>
+                                        <FileText color="var(--primary-color)" size={18} />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {selectedPatient && (
+                    <div className="animate-fade-in" style={{ marginTop: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f4f6f9', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+                            <div>
+                                <h3 style={{ margin: 0 }}>{selectedPatient.info.name}</h3>
+                                <p className="text-muted" style={{ margin: 0 }}>ID: {selectedPatient.info.patientId}</p>
+                            </div>
+                            <button className="btn btn-secondary" onClick={() => setSelectedPatient(null)} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                                Clear Search
+                            </button>
+                        </div>
+
+                        <h4 style={{ marginBottom: '1rem', color: 'var(--secondary-color)' }}>Assessment History ({selectedPatient.assessments.length})</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {selectedPatient.assessments.map((row, idx) => {
+                                // Extract readable date properly
+                                const dateStr = row.Assessment_Date || row.assessmentDate || row.Timestamp || 'Unknown Date';
+                                const parsedDate = new Date(dateStr);
+                                const niceDate = isNaN(parsedDate.getTime()) ? dateStr : parsedDate.toLocaleDateString();
+
+                                return (
+                                    <div key={idx} style={{
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                        padding: '1.25rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)'
+                                    }}>
+                                        <div>
+                                            <strong style={{ display: 'block', fontSize: '1.1rem' }}>Assessment: {niceDate}</strong>
+                                            <span className="text-muted" style={{ fontSize: '0.9rem' }}>Informant: {row.Informant || row.informant || 'N/A'}</span>
+                                        </div>
+                                        <button className="btn btn-primary" onClick={() => handleDownload(row)} style={{ padding: '0.5rem 1rem' }}>
+                                            <FileText size={16} style={{ marginRight: '0.5rem' }} /> PDF Report
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -390,6 +582,10 @@ export default function App() {
     return (
         <div className="app-container">
             <Header setView={setView} />
+
+            {view === 'history' && (
+                <PatientHistory setView={setView} />
+            )}
 
             {view === 'dashboard' && (
                 <PatientManagement
