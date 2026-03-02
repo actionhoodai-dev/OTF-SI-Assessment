@@ -4,14 +4,37 @@ import { saveAssessment, fetchPatients } from './services/api';
 import { downloadPDF } from './services/pdfGenerator';
 import { ChevronDown, ChevronRight, Save, FileText, CheckCircle, Search, PlusCircle, Activity } from 'lucide-react';
 
-const Header = () => (
-    <header className="app-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Activity size={28} />
-            <h1 style={{ color: 'white', margin: 0, fontSize: '1.5rem' }}>OTF SI Assessment</h1>
-        </div>
-    </header>
-);
+const Header = ({ setView }) => {
+    const [menuOpen, setMenuOpen] = useState(false);
+    return (
+        <header className="app-nav" style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <Activity size={28} />
+                <h1 style={{ color: 'white', margin: 0, fontSize: '1.5rem', cursor: 'pointer' }} onClick={() => setView('dashboard')}>OTF SI Assessment</h1>
+            </div>
+
+            {/* Hamburger Menu */}
+            <div style={{ cursor: 'pointer' }} onClick={() => setMenuOpen(!menuOpen)}>
+                <div style={{ width: '25px', height: '3px', backgroundColor: 'white', margin: '5px 0' }}></div>
+                <div style={{ width: '25px', height: '3px', backgroundColor: 'white', margin: '5px 0' }}></div>
+                <div style={{ width: '25px', height: '3px', backgroundColor: 'white', margin: '5px 0' }}></div>
+            </div>
+
+            {menuOpen && (
+                <div style={{
+                    position: 'absolute', top: '100%', right: '1rem',
+                    background: 'white', border: '1px solid var(--border)',
+                    boxShadow: 'var(--shadow-lg)', borderRadius: 'var(--radius-md)',
+                    overflow: 'hidden', zIndex: 1000, width: '200px'
+                }}>
+                    <div className="menu-item" onClick={() => { setView('dashboard'); setMenuOpen(false); }}>
+                        Home / Dashboard
+                    </div>
+                </div>
+            )}
+        </header>
+    );
+};
 
 const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -43,55 +66,70 @@ const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
     };
 
     return (
-        <div className="container" style={{ marginTop: '2rem' }}>
-            <div className="card text-center animate-fade-in" style={{ maxWidth: '600px', margin: '0 auto', padding: '3rem' }}>
-                <h2 className="section-title text-center" style={{ borderBottom: 'none', marginBottom: '2rem' }}>Patient Dashboard</h2>
+        <div className="container" style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* New Patient Registration Block */}
+            <div className="card text-center animate-fade-in" style={{ maxWidth: '700px', margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+                <Activity size={48} color="var(--primary-color)" style={{ margin: '0 auto 1rem' }} />
+                <h2 style={{ marginBottom: '1rem', color: 'var(--primary-color)' }}>New Patient Assessment</h2>
+                <p className="text-muted" style={{ marginBottom: '2rem' }}>Begin a fresh sensory integration assessment for a new client.</p>
+                <button className="btn btn-primary" onClick={handleNewClick} style={{ fontSize: '1.2rem', padding: '1rem 2rem', borderRadius: '50px' }}>
+                    <PlusCircle style={{ marginRight: '0.75rem' }} /> Start New Assessment Form
+                </button>
+            </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <button className="btn btn-primary" onClick={handleNewClick} style={{ fontSize: '1.2rem', padding: '1rem' }}>
-                        <PlusCircle style={{ marginRight: '0.5rem' }} /> Start New Assessment
-                    </button>
+            {/* Existing Patient Search Block */}
+            <div className="card animate-fade-in" style={{ maxWidth: '700px', margin: '0 auto', width: '100%', padding: '2rem' }}>
+                <h3 style={{ marginBottom: '0.5rem', color: 'var(--primary-color)', textAlign: 'center' }}>Search Existing Patients</h3>
+                <p className="text-muted text-center" style={{ marginBottom: '1.5rem', fontSize: '0.9rem' }}>Type at least 2 letters to auto-fill existing demographic data.</p>
 
-                    <div style={{ margin: '1.5rem 0', position: 'relative' }}>
-                        <hr style={{ borderTop: '1px solid var(--border)', borderBottom: 'none' }} />
-                        <span style={{
-                            position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)',
-                            background: 'white', padding: '0 10px', color: 'var(--text-muted)'
-                        }}>OR</span>
-                    </div>
+                <div style={{ position: 'relative' }}>
+                    <Search style={{ position: 'absolute', top: '15px', left: '1rem', color: 'var(--text-muted)' }} size={20} />
+                    <input
+                        type="text"
+                        placeholder="Search by Patient ID (e.g., SI101) or Name..."
+                        style={{ paddingLeft: '3rem', fontSize: '1.1rem', width: '100%', borderRadius: '50px' }}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
 
-                    <div style={{ position: 'relative', textAlign: 'left' }}>
-                        <Search style={{ position: 'absolute', top: '15px', left: '1rem', color: 'var(--text-muted)' }} size={20} />
-                        <input
-                            type="text"
-                            placeholder="Search existing patients by Name or ID..."
-                            style={{ paddingLeft: '3rem', fontSize: '1.1rem', width: '100%' }}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        {filteredPatients.length > 0 && (
-                            <div style={{
-                                position: 'absolute', top: '100%', left: 0, right: 0,
-                                background: 'white', border: '1px solid var(--border)',
-                                borderRadius: 'var(--radius-md)', zIndex: 10, marginTop: '5px',
-                                boxShadow: 'var(--shadow-md)'
-                            }}>
-                                {filteredPatients.map((p, idx) => (
-                                    <div
-                                        key={idx}
-                                        style={{ padding: '10px 15px', borderBottom: idx < filteredPatients.length - 1 ? '1px solid #f0f0f0' : 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}
-                                        onClick={() => onSelectPatient(p)}
-                                    >
-                                        <strong style={{ color: 'var(--primary-color)' }}>{p.patientId}</strong>
-                                        <span>{p.name}</span>
+                    {filteredPatients.length > 0 && (
+                        <div style={{
+                            position: 'absolute', top: '100%', left: 0, right: 0,
+                            background: 'white', border: '1px solid var(--border)',
+                            borderRadius: 'var(--radius-md)', zIndex: 10, marginTop: '8px',
+                            boxShadow: 'var(--shadow-lg)'
+                        }}>
+                            {filteredPatients.map((p, idx) => (
+                                <div
+                                    key={idx}
+                                    style={{
+                                        padding: '12px 20px',
+                                        borderBottom: idx < filteredPatients.length - 1 ? '1px solid #f0f0f0' : 'none',
+                                        cursor: 'pointer', display: 'flex', justifyContent: 'space-between',
+                                        alignItems: 'center', transition: 'background 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                    onClick={() => onSelectPatient(p)}
+                                >
+                                    <div>
+                                        <strong style={{ color: 'var(--primary-color)', display: 'block', fontSize: '1.1rem' }}>{p.patientId}</strong>
+                                        <span className="text-muted" style={{ fontSize: '0.9rem' }}>{p.name}</span>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                        {searchQuery && filteredPatients.length === 0 && (
-                            <div style={{ marginTop: '10px', color: 'var(--text-muted)', textAlign: 'center' }}>No relevant patients found.</div>
-                        )}
-                    </div>
+                                    <ChevronRight color="var(--primary-color)" size={18} />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {searchQuery.length >= 2 && filteredPatients.length === 0 && (
+                        <div style={{
+                            marginTop: '10px', padding: '15px', color: 'var(--text-muted)',
+                            textAlign: 'center', background: '#f8f9fa', borderRadius: 'var(--radius-md)'
+                        }}>
+                            No relevant patients found matching "{searchQuery}".
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -351,7 +389,7 @@ export default function App() {
 
     return (
         <div className="app-container">
-            <Header />
+            <Header setView={setView} />
 
             {view === 'dashboard' && (
                 <PatientManagement
