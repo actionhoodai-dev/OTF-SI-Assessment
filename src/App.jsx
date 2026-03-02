@@ -49,7 +49,43 @@ const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
         });
     }, []);
 
-    const filteredPatients = patients.filter(p => {
+    const uniquePatientsMap = new Map();
+    patients.forEach(p => {
+        const pId = p.Patient_ID || p.patientId || '';
+        const name = p.Name || p.name || '';
+        const dob = p.DOB || p.dob || '';
+        let ageSex = p.Age_Sex || p.ageSex || '';
+        const address = p.Address || p.address || '';
+        const informant = p.Informant || p.informant || '';
+
+        let age = '';
+        let sex = '';
+        if (ageSex) {
+            const parts = ageSex.split(' ');
+            if (parts.length >= 2) {
+                age = parts[0] + (parts[1].length === 1 ? ' ' + parts[1] : '');
+                sex = parts[parts.length - 1];
+            } else {
+                age = parts[0];
+            }
+        }
+
+        // Use full demographic details when autofilling the intake form!
+        if (pId) {
+            uniquePatientsMap.set(pId, {
+                patientId: pId,
+                name,
+                dob,
+                age,
+                sex,
+                address,
+                informant
+            });
+        }
+    });
+    const uniquePatients = Array.from(uniquePatientsMap.values());
+
+    const filteredPatients = uniquePatients.filter(p => {
         if (!searchQuery) return false;
         const q = searchQuery.toLowerCase();
         const idMatch = p.patientId && p.patientId.toLowerCase().includes(q);
@@ -59,9 +95,9 @@ const PatientManagement = ({ onSelectPatient, onNewPatient }) => {
 
     const handleNewClick = () => {
         let max = 99; // Defaults to starting next at 100 if none exist (SI100)
-        patients.forEach(p => {
-            if (p.patientId && p.patientId.startsWith('SI')) {
-                const num = parseInt(p.patientId.replace('SI', ''), 10);
+        uniquePatients.forEach(p => {
+            if (p.patientId && p.patientId.toUpperCase().startsWith('SI')) {
+                const num = parseInt(p.patientId.toUpperCase().replace('SI', ''), 10);
                 if (!isNaN(num) && num > max) max = num;
             }
         });
