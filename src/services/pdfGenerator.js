@@ -101,11 +101,32 @@ export const generatePDF = (patientInfo, assessmentData) => {
         ...INTERPRETATION_COLUMNS.map(col => col.label)
     ]];
 
+    const formatQuestionIdForRow = (qId, rowId) => {
+        const rowPrefixes = {
+            'TACTILE': 'T',
+            'VESTIBULAR': 'V',
+            'PROPRIOCEPTIVE': 'P',
+            'GENERAL REACTIONS': 'GR',
+            'AUDITORY': 'A',
+            'VISUAL': 'VIS'
+        };
+        const targetPrefix = rowPrefixes[rowId] || '';
+        const match = qId.match(/^([A-Z]+)(\d+)$/);
+        if (match) {
+            const [, prefix, num] = match;
+            if (prefix === targetPrefix) {
+                return num; // Strip prefix if it belongs to the current row
+            }
+        }
+        return qId; // Keep prefix if it belongs to another row/section
+    };
+
     const body = INTERPRETATION_ROWS.map(row => {
         const rowData = [row.label];
         INTERPRETATION_COLUMNS.forEach(col => {
             const triggeredList = matrix[row.id] && matrix[row.id][col.id] ? matrix[row.id][col.id] : [];
-            const displayVal = triggeredList.length > 0 ? triggeredList.join(', ') : '-';
+            const formattedList = triggeredList.map(qId => formatQuestionIdForRow(qId, row.id));
+            const displayVal = formattedList.length > 0 ? formattedList.join(', ') : '-';
             rowData.push(displayVal);
         });
         return rowData;
@@ -208,22 +229,7 @@ export const generatePDF = (patientInfo, assessmentData) => {
     doc.rect(14, yPos, 269, 18); // remarks box
     yPos += 24;
 
-    if (yPos > 180) {
-        doc.addPage();
-        yPos = 20;
-    }
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.5);
-    doc.text('Therapist Signature:', 14, yPos);
-    doc.text('Date:', 200, yPos);
-    yPos += 10;
-    doc.line(14, yPos, 80, yPos); // signature line
-    doc.line(200, yPos, 260, yPos); // date line
-    yPos += 4;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    doc.text('Occupational Therapist', 14, yPos);
 
     // Add page numbers footer dynamically
     const pageCount = doc.internal.getNumberOfPages();
