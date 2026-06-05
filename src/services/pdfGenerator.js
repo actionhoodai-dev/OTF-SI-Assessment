@@ -86,6 +86,84 @@ export const generatePDF = (patientInfo, assessmentData) => {
     doc.line(14, yPos, 283, yPos);
     yPos += 7;
 
+    // Detailed Questionnaire Section (SR, NO, NOT ANSWERED)
+    ASSESSMENT_STRUCTURE.forEach(section => {
+        if (yPos > 185) {
+            doc.addPage();
+            yPos = 15;
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text(section.title, 14, yPos);
+        yPos += 5;
+
+        section.subsections.forEach(sub => {
+            const tableBody = [];
+
+            sub.questions.forEach(q => {
+                const key = `${section.id}_${sub.id}_${q.id}`;
+                const selection = assessmentData[key];
+
+                let checkSR = '';
+                let checkNo = '';
+                let checkNotAnswered = '';
+
+                if (selection === 'YES') {
+                    checkSR = 'x';
+                } else if (selection === 'NO') {
+                    checkNo = 'x';
+                } else {
+                    checkNotAnswered = 'x';
+                }
+
+                tableBody.push([
+                    q.text,
+                    checkSR,
+                    checkNo,
+                    checkNotAnswered
+                ]);
+            });
+
+            const commentKey = `${section.id}_${sub.id}_Comments`;
+            const commentData = assessmentData[commentKey];
+
+            tableBody.push([
+                {
+                    content: `Comments: ${commentData || ''}`,
+                    colSpan: 4,
+                    styles: { fontStyle: 'italic', fillColor: [248, 249, 250], halign: 'left' }
+                }
+            ]);
+
+            doc.autoTable({
+                startY: yPos,
+                head: [[sub.title, 'SR', 'NO', 'NOT ANSWERED']],
+                body: tableBody,
+                theme: 'grid',
+                headStyles: { fillColor: [13, 27, 42], textColor: 255, fontSize: 8 },
+                columnStyles: {
+                    0: { cellWidth: 209 },
+                    1: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },
+                    2: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },
+                    3: { cellWidth: 20, halign: 'center', fontStyle: 'bold' }
+                },
+                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+                margin: { left: 14, right: 14 },
+                pageBreak: 'auto',
+                rowPageBreak: 'avoid'
+            });
+
+            yPos = doc.lastAutoTable.finalY + 6;
+        });
+
+        yPos += 2;
+    });
+
+    // Add page break for the final Interpretation Matrix page
+    doc.addPage();
+    yPos = 15;
+
     // SENSORY ASSESSMENT INTERPRETATION MATRIX (Header)
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
@@ -166,57 +244,7 @@ export const generatePDF = (patientInfo, assessmentData) => {
 
     yPos = doc.lastAutoTable.finalY + 6;
 
-    // Comments & Observations
-    const allComments = [];
-    const structSections = [
-        { id: 'TACTILE', label: 'Tactile' },
-        { id: 'VESTIBULAR', label: 'Vestibular' },
-        { id: 'PROPRIOCEPTION', label: 'Proprioception' },
-        { id: 'AUDITORY', label: 'Auditory' },
-        { id: 'VISUAL', label: 'Visual' },
-        { id: 'GENERAL REACTIONS', label: 'General Reactions' }
-    ];
-
-    structSections.forEach(sec => {
-        const structSec = ASSESSMENT_STRUCTURE.find(s => s.id === sec.id);
-        if (structSec) {
-            const secComments = [];
-            structSec.subsections.forEach(sub => {
-                const commentKey = `${sec.id}_${sub.id}_Comments`;
-                const val = assessmentData[commentKey];
-                if (val && val.trim() !== '') {
-                    secComments.push(`${sub.title}: ${val.trim()}`);
-                }
-            });
-            if (secComments.length > 0) {
-                allComments.push(`${sec.label} Comments:\n- ${secComments.join('\n- ')}`);
-            }
-        }
-    });
-
-    if (allComments.length > 0) {
-        if (yPos > 155) {
-            doc.addPage();
-            yPos = 20;
-        }
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10);
-        doc.text('SECTION COMMENTS & OBSERVATIONS:', 14, yPos);
-        yPos += 5;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        const commentsText = allComments.join('\n\n');
-        const splitComments = doc.splitTextToSize(commentsText, 269);
-        doc.text(splitComments, 14, yPos);
-        yPos += (splitComments.length * 4) + 6;
-    }
-
-    // Clinical Remarks and Therapist Signature Area
-    if (yPos > 150) {
-        doc.addPage();
-        yPos = 20;
-    }
-
+    // Clinical Remarks Recommendations Area
     doc.setLineWidth(0.4);
     doc.line(14, yPos, 283, yPos);
     yPos += 6;
@@ -227,9 +255,6 @@ export const generatePDF = (patientInfo, assessmentData) => {
     yPos += 5;
     doc.setFont('helvetica', 'normal');
     doc.rect(14, yPos, 269, 18); // remarks box
-    yPos += 24;
-
-
 
     // Add page numbers footer dynamically
     const pageCount = doc.internal.getNumberOfPages();
