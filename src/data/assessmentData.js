@@ -317,3 +317,274 @@ export const ASSESSMENT_STRUCTURE = [
         ]
     }
 ];
+
+export const INTERPRETATION_CATEGORIES = {
+    TACTILE: [
+        { id: "tactile_hyporeactive", label: "Hyporeactive" },
+        { id: "tactile_hyperreactive", label: "Hyperreactive" },
+        { id: "tactile_discrimination", label: "Tactile Discrimination" },
+        { id: "tactile_visual_spatial", label: "Visual Spatial" },
+        { id: "tactile_behavior_traits", label: "Behavior Traits" }
+    ],
+    VESTIBULAR: [
+        { id: "vestibular_hyporeactive", label: "Hyporeactive" },
+        { id: "vestibular_hyperreactive", label: "Hyperreactive" },
+        { id: "vestibular_postural_tone", label: "Postural Tone Control" },
+        { id: "vestibular_bilateral_integration", label: "Bilateral Integration" },
+        { id: "vestibular_visual_spatial", label: "Visual Spatial" },
+        { id: "vestibular_body_scheme_praxis", label: "Body Scheme & Praxis" },
+        { id: "vestibular_neuromotor", label: "Neuromotor" },
+        { id: "vestibular_behavior_traits", label: "Behavior Traits" }
+    ],
+    PROPRIOCEPTION: [
+        { id: "proprioceptive_hyporeactive", label: "Hyporeactive" },
+        { id: "proprioceptive_hyperreactive", label: "Hyperreactive" },
+        { id: "proprioceptive_postural_tone", label: "Postural Tone Control" },
+        { id: "proprioceptive_tactile_discrimination", label: "Tactile Discrimination" },
+        { id: "proprioceptive_visual_spatial", label: "Visual Spatial" },
+        { id: "proprioceptive_body_scheme_praxis", label: "Body Scheme & Praxis" },
+        { id: "proprioceptive_neuromotor", label: "Neuromotor" },
+        { id: "proprioceptive_behavior_traits", label: "Behavior Traits" }
+    ],
+    AUDITORY: [
+        { id: "auditory_hyporeactive", label: "Hyporeactive" },
+        { id: "auditory_hyperreactive", label: "Hyperreactive" }
+    ],
+    VISUAL: [
+        { id: "visual_hyporeactive", label: "Hyporeactive" },
+        { id: "visual_hyperreactive", label: "Hyperreactive" },
+        { id: "visual_visual_spatial", label: "Visual Spatial" }
+    ],
+    "GENERAL REACTIONS": [
+        { id: "general_reactions", label: "General Reactions" }
+    ]
+};
+
+export const INTERPRETATION_MAP = {
+    // Tactile (T1 - T35)
+    T1: ["tactile_hyporeactive", "tactile_hyperreactive"],
+    T2: ["tactile_hyperreactive"],
+    T3: ["tactile_hyporeactive", "tactile_hyperreactive"],
+    T4: ["tactile_hyperreactive"],
+    T5: ["tactile_hyperreactive"],
+    T6: ["tactile_hyporeactive"],
+    T7: ["tactile_hyporeactive"],
+    T8: ["tactile_hyperreactive"],
+    T9: ["tactile_hyperreactive"],
+    T10: ["tactile_hyporeactive"],
+    T11: ["tactile_hyperreactive", "tactile_discrimination"],
+    T12: ["tactile_hyperreactive"],
+    T13: ["tactile_hyperreactive"],
+    T14: ["tactile_hyporeactive"],
+    T15: ["tactile_hyperreactive"],
+    T16: ["tactile_hyperreactive"],
+    T17: ["tactile_hyperreactive"],
+    T18: ["tactile_hyperreactive"],
+    T19: ["tactile_hyporeactive"],
+    T20: ["tactile_hyporeactive", "tactile_discrimination"],
+    T21: ["tactile_hyperreactive"],
+    T22: ["tactile_hyporeactive"],
+    T23: ["tactile_hyporeactive"],
+    T24: ["tactile_hyporeactive"],
+    T25: ["tactile_hyporeactive"],
+    T26: ["tactile_hyporeactive"],
+    T27: ["tactile_hyporeactive"],
+    T28: ["tactile_hyporeactive"],
+    T29: ["tactile_hyporeactive"],
+    T30: ["tactile_behavior_traits"],
+    T31: ["tactile_behavior_traits"],
+    T32: ["tactile_behavior_traits"],
+    T33: ["tactile_behavior_traits"],
+    T34: ["tactile_behavior_traits"],
+    T35: ["tactile_behavior_traits"],
+
+    // Vestibular (V1 - V38)
+    V1: ["vestibular_postural_tone"],
+    V2: ["vestibular_postural_tone"],
+    V3: ["vestibular_postural_tone"],
+    V4: ["vestibular_postural_tone"],
+    V5: ["vestibular_hyporeactive"],
+    V6: ["vestibular_hyporeactive"],
+    V7: ["vestibular_hyporeactive"],
+    V8: ["vestibular_neuromotor"],
+    V9: ["vestibular_hyporeactive"],
+    V10: ["vestibular_postural_tone"],
+    V11: ["vestibular_postural_tone"],
+    V12: ["vestibular_neuromotor"],
+    V13: ["vestibular_neuromotor"],
+    V14: ["vestibular_neuromotor"],
+    V15: ["vestibular_postural_tone"],
+    V16: ["vestibular_hyperreactive"],
+    V17: ["vestibular_postural_tone"],
+    V18: ["vestibular_postural_tone"],
+    V19: ["vestibular_hyperreactive"],
+    V20: ["vestibular_bilateral_integration"],
+    V21: ["vestibular_bilateral_integration"],
+    V22: ["vestibular_bilateral_integration"],
+    V23: ["vestibular_visual_spatial"],
+    V24: ["vestibular_visual_spatial"],
+    V25: ["vestibular_visual_spatial"],
+    V26: ["vestibular_body_scheme_praxis"],
+    V27: ["vestibular_body_scheme_praxis"],
+    V28: ["vestibular_hyperreactive"],
+    V29: ["vestibular_hyperreactive"],
+    V30: ["vestibular_behavior_traits"],
+    V31: ["vestibular_behavior_traits"],
+    V32: ["vestibular_hyporeactive"],
+    V33: ["vestibular_hyporeactive"],
+    V34: ["vestibular_hyporeactive"],
+    V35: ["vestibular_visual_spatial"],
+    V36: ["vestibular_hyporeactive"],
+    V37: ["vestibular_hyporeactive"],
+    V38: ["vestibular_hyporeactive"],
+
+    // Proprioception (P1 - P29)
+    P1: ["proprioceptive_postural_tone"],
+    P2: ["proprioceptive_postural_tone"],
+    P3: ["proprioceptive_postural_tone"],
+    P4: ["proprioceptive_postural_tone"],
+    P5: ["proprioceptive_neuromotor"],
+    P6: ["proprioceptive_postural_tone"],
+    P7: ["proprioceptive_postural_tone"],
+    P8: ["proprioceptive_body_scheme_praxis"],
+    P9: ["proprioceptive_body_scheme_praxis"],
+    P10: ["proprioceptive_body_scheme_praxis"],
+    P11: ["proprioceptive_tactile_discrimination"],
+    P12: ["proprioceptive_tactile_discrimination"],
+    P13: ["proprioceptive_visual_spatial"],
+    P14: ["proprioceptive_tactile_discrimination"],
+    P15: ["proprioceptive_hyporeactive"],
+    P16: ["proprioceptive_tactile_discrimination"],
+    P17: ["proprioceptive_body_scheme_praxis"],
+    P18: ["proprioceptive_hyporeactive"],
+    P19: ["proprioceptive_hyporeactive"],
+    P20: ["proprioceptive_hyporeactive"],
+    P21: ["proprioceptive_hyporeactive"],
+    P22: ["proprioceptive_hyporeactive"],
+    P23: ["proprioceptive_hyporeactive"],
+    P24: ["proprioceptive_hyporeactive"],
+    P25: ["proprioceptive_hyporeactive"],
+    P26: ["proprioceptive_behavior_traits"],
+    P27: ["tactile_hyporeactive", "proprioceptive_behavior_traits"], // Cross-section mapping example
+    P28: ["tactile_hyporeactive", "proprioceptive_behavior_traits"], // Cross-section mapping example
+    P29: ["proprioceptive_behavior_traits"],
+
+    // Auditory (A1 - A8)
+    A1: ["auditory_hyperreactive"],
+    A2: ["auditory_hyperreactive"],
+    A3: ["auditory_hyperreactive"],
+    A4: ["auditory_hyporeactive"],
+    A5: ["auditory_hyporeactive"],
+    A6: ["auditory_hyporeactive"],
+    A7: ["auditory_hyporeactive"],
+    A8: ["auditory_hyporeactive"],
+
+    // Visual (VIS1 - VIS18)
+    VIS1: ["visual_hyporeactive"],
+    VIS2: ["visual_hyperreactive"],
+    VIS3: ["visual_hyporeactive"],
+    VIS4: ["visual_hyperreactive"],
+    VIS5: ["visual_hyperreactive"],
+    VIS6: ["visual_hyporeactive"],
+    VIS7: ["visual_hyperreactive"],
+    VIS8: ["visual_hyporeactive"],
+    VIS9: ["visual_hyporeactive"],
+    VIS10: ["visual_visual_spatial"],
+    VIS11: ["visual_visual_spatial"],
+    VIS12: ["visual_visual_spatial"],
+    VIS13: ["visual_visual_spatial"],
+    VIS14: ["visual_visual_spatial"],
+    VIS15: ["visual_visual_spatial"],
+    VIS16: ["visual_visual_spatial"],
+    VIS17: ["visual_hyporeactive"],
+    VIS18: ["visual_hyporeactive"],
+
+    // General Reactions (GR1 - GR9)
+    GR1: ["general_reactions"],
+    GR2: ["general_reactions"],
+    GR3: ["general_reactions"],
+    GR4: ["general_reactions"],
+    GR5: ["general_reactions"],
+    GR6: ["general_reactions"],
+    GR7: ["general_reactions"],
+    GR8: ["general_reactions"],
+    GR9: ["general_reactions"]
+};
+
+export const getPrefixedQuestionId = (sectionId, qId) => {
+    const prefixes = {
+        'TACTILE': 'T',
+        'VESTIBULAR': 'V',
+        'PROPRIOCEPTION': 'P',
+        'AUDITORY': 'A',
+        'VISUAL': 'VIS',
+        'GENERAL REACTIONS': 'GR'
+    };
+    const prefix = prefixes[sectionId] || '';
+    const num = qId.replace('Q', '');
+    return `${prefix}${num}`;
+};
+
+export const sortQuestionIds = (ids) => {
+    const prefixOrder = { T: 1, V: 2, P: 3, A: 4, VIS: 5, GR: 6 };
+    return [...ids].sort((a, b) => {
+        const matchA = a.match(/^([A-Z]+)(\d+)$/);
+        const matchB = b.match(/^([A-Z]+)(\d+)$/);
+        if (!matchA || !matchB) return a.localeCompare(b);
+        const [, prefA, numA] = matchA;
+        const [, prefB, numB] = matchB;
+        if (prefA !== prefB) {
+            return (prefixOrder[prefA] || 99) - (prefixOrder[prefB] || 99);
+        }
+        return parseInt(numA, 10) - parseInt(numB, 10);
+    });
+};
+
+export const computeInterpretationResults = (assessmentData) => {
+    const results = {};
+    Object.keys(INTERPRETATION_CATEGORIES).forEach(secKey => {
+        results[secKey] = {};
+        INTERPRETATION_CATEGORIES[secKey].forEach(cat => {
+            results[secKey][cat.id] = [];
+        });
+    });
+
+    ASSESSMENT_STRUCTURE.forEach(section => {
+        section.subsections.forEach(sub => {
+            sub.questions.forEach(q => {
+                const key = `${section.id}_${sub.id}_${q.id}`;
+                if (assessmentData[key] === 'YES') {
+                    const prefixedId = getPrefixedQuestionId(section.id, q.id);
+                    const targets = INTERPRETATION_MAP[prefixedId];
+                    if (targets && Array.isArray(targets)) {
+                        targets.forEach(catId => {
+                            let targetSec = '';
+                            if (catId.startsWith('tactile_')) targetSec = 'TACTILE';
+                            else if (catId.startsWith('vestibular_')) targetSec = 'VESTIBULAR';
+                            else if (catId.startsWith('proprioceptive_')) targetSec = 'PROPRIOCEPTION';
+                            else if (catId.startsWith('auditory_')) targetSec = 'AUDITORY';
+                            else if (catId.startsWith('visual_')) targetSec = 'VISUAL';
+                            else if (catId === 'general_reactions') targetSec = 'GENERAL REACTIONS';
+
+                            if (targetSec && results[targetSec] && results[targetSec][catId]) {
+                                if (!results[targetSec][catId].includes(prefixedId)) {
+                                    results[targetSec][catId].push(prefixedId);
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    });
+
+    Object.keys(results).forEach(secKey => {
+        Object.keys(results[secKey]).forEach(catId => {
+            results[secKey][catId] = sortQuestionIds(results[secKey][catId]);
+        });
+    });
+
+    return results;
+};
+
+
