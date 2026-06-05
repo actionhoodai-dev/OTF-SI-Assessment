@@ -88,7 +88,7 @@ export const generatePDF = (patientInfo, assessmentData) => {
 
     // Detailed Questionnaire Section (SR, NO, NOT ANSWERED)
     ASSESSMENT_STRUCTURE.forEach(section => {
-        if (yPos > 185) {
+        if (yPos > 175) {
             doc.addPage();
             yPos = 15;
         }
@@ -96,9 +96,13 @@ export const generatePDF = (patientInfo, assessmentData) => {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.text(section.title, 14, yPos);
-        yPos += 5;
+        yPos += 6;
 
         section.subsections.forEach(sub => {
+            if (yPos > 175) {
+                doc.addPage();
+                yPos = 15;
+            }
             const tableBody = [];
 
             sub.questions.forEach(q => {
