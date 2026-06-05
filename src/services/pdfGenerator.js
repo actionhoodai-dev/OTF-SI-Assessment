@@ -2,176 +2,227 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { 
     ASSESSMENT_STRUCTURE, 
-    INTERPRETATION_CATEGORIES, 
+    INTERPRETATION_COLUMNS, 
+    INTERPRETATION_ROWS, 
     computeInterpretationResults 
 } from '../data/assessmentData';
 
 export const generatePDF = (patientInfo, assessmentData) => {
-    const doc = new jsPDF();
-    let yPos = 20;
+    // Landscape A4 size: 297mm width, 210mm height
+    const doc = new jsPDF('l', 'mm', 'a4');
+    let yPos = 15;
 
     // Header Styling
-    doc.setFontSize(14);
+    doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
-    doc.text('SRI SARVAVIDHYA MULTISPECIALITY THERAPY CENTRE', 105, yPos, { align: 'center' });
-    yPos += 7;
-    doc.setFontSize(10);
+    doc.text('SRI SARVAVIDHYA MULTISPECIALITY THERAPY CENTRE', 148.5, yPos, { align: 'center' });
+    yPos += 5;
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('216, THIRUNAGAR COLONY, ERODE- 638003. TAMIL NADU.', 105, yPos, { align: 'center' });
-    yPos += 15;
-    doc.setFontSize(12);
+    doc.text('216, THIRUNAGAR COLONY, ERODE- 638003. TAMIL NADU.', 148.5, yPos, { align: 'center' });
+    yPos += 8;
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text('OCCUPATIONAL THERAPY ASSESSMENT REPORT', 105, yPos, { align: 'center' });
-    yPos += 15;
+    doc.text('OCCUPATIONAL THERAPY ASSESSMENT REPORT - SENSORY INTEGRATION', 148.5, yPos, { align: 'center' });
+    yPos += 8;
 
     // Header Rule
-    doc.setLineWidth(0.5);
-    doc.line(14, yPos - 5, 196, yPos - 5);
+    doc.setLineWidth(0.4);
+    doc.line(14, yPos - 3, 283, yPos - 3);
 
     // Demographic Data
-    doc.setFontSize(11);
+    doc.setFontSize(10);
     doc.text('DEMOGRAPHIC DATA:', 14, yPos);
-    yPos += 8;
+    yPos += 6;
     doc.setFont('helvetica', 'normal');
 
     const startX = 14;
-    const col2X = 105;
+    const col2X = 150;
 
-    doc.text(`1. NAME: ${patientInfo.name || ''}   (ID: ${patientInfo.patientId || ''})`, startX, yPos);
-    doc.text(`4. DATE OF ASSESSMENT: ${patientInfo.assessmentDate || ''}`, col2X, yPos);
-    yPos += 7;
-    doc.text(`2. DATE OF BIRTH: ${patientInfo.dob || ''}`, startX, yPos);
-    doc.text(`5. INFORMANT: ${patientInfo.informant || ''}`, col2X, yPos);
-    yPos += 7;
-    doc.text(`3. AGE: ${patientInfo.age || ''}     SEX: ${patientInfo.sex || ''}`, startX, yPos);
-    yPos += 7;
-    const addressLines = doc.splitTextToSize(`6. ADDRESS: ${patientInfo.address || ''}`, 180);
-    doc.text(addressLines, startX, yPos);
-    yPos += addressLines.length * 6;
-    const complaintsLines = doc.splitTextToSize(`CHIEF COMPLAINTS: ${patientInfo.chiefComplaints || ''}`, 180);
-    doc.text(complaintsLines, startX, yPos);
-    yPos += (complaintsLines.length * 6) + 5;
+    doc.setFont('helvetica', 'bold');
+    doc.text('1. NAME: ', startX, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${patientInfo.name || ''}   (ID: ${patientInfo.patientId || ''})`, startX + 18, yPos);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('4. DATE OF ASSESSMENT: ', col2X, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${patientInfo.assessmentDate || ''}`, col2X + 48, yPos);
+    yPos += 5;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('2. DATE OF BIRTH: ', startX, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${patientInfo.dob || ''}`, startX + 32, yPos);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('5. INFORMANT: ', col2X, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${patientInfo.informant || ''}`, col2X + 30, yPos);
+    yPos += 5;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('3. AGE / SEX: ', startX, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${patientInfo.age || ''} / ${patientInfo.sex || ''}`, startX + 24, yPos);
+    yPos += 5;
+
+    const addressLines = doc.splitTextToSize(`6. ADDRESS: ${patientInfo.address || ''}`, 269);
+    doc.setFont('helvetica', 'bold');
+    doc.text('6. ADDRESS: ', startX, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(addressLines, startX + 24, yPos);
+    yPos += addressLines.length * 4.5;
+
+    const complaintsLines = doc.splitTextToSize(`CHIEF COMPLAINTS: ${patientInfo.chiefComplaints || ''}`, 269);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CHIEF COMPLAINTS: ', startX, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(complaintsLines, startX + 38, yPos);
+    yPos += (complaintsLines.length * 4.5) + 3;
 
     // Divider
-    doc.line(14, yPos, 196, yPos);
-    yPos += 10;
+    doc.setLineWidth(0.3);
+    doc.line(14, yPos, 283, yPos);
+    yPos += 7;
 
     // SENSORY ASSESSMENT INTERPRETATION MATRIX (Header)
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('SENSORY ASSESSMENT INTERPRETATION MATRIX', 105, yPos, { align: 'center' });
-    yPos += 10;
+    doc.setFontSize(11);
+    doc.text('SENSORY ASSESSMENT INTERPRETATION MATRIX', 148.5, yPos, { align: 'center' });
+    yPos += 5;
 
     // Compute interpretation results
     const matrix = computeInterpretationResults(assessmentData);
 
-    const sectionsToRender = [
-        { id: 'TACTILE', title: 'TACTILE SYSTEM' },
-        { id: 'VESTIBULAR', title: 'VESTIBULAR SYSTEM' },
-        { id: 'PROPRIOCEPTION', title: 'PROPRIOCEPTIVE SYSTEM' },
-        { id: 'AUDITORY', title: 'AUDITORY SYSTEM' },
-        { id: 'VISUAL', title: 'VISUAL SYSTEM' },
-        { id: 'GENERAL REACTIONS', title: 'GENERAL REACTIONS' }
+    // Build table columns and rows
+    const head = [[
+        'SYSTEM',
+        ...INTERPRETATION_COLUMNS.map(col => col.label)
+    ]];
+
+    const body = INTERPRETATION_ROWS.map(row => {
+        const rowData = [row.label];
+        INTERPRETATION_COLUMNS.forEach(col => {
+            const triggeredList = matrix[row.id] && matrix[row.id][col.id] ? matrix[row.id][col.id] : [];
+            const displayVal = triggeredList.length > 0 ? triggeredList.join(', ') : '-';
+            rowData.push(displayVal);
+        });
+        return rowData;
+    });
+
+    doc.autoTable({
+        startY: yPos,
+        head: head,
+        body: body,
+        theme: 'grid',
+        headStyles: { 
+            fillColor: [13, 27, 42], 
+            textColor: 255, 
+            fontSize: 7, 
+            halign: 'center', 
+            valign: 'middle',
+            cellPadding: 2
+        },
+        columnStyles: {
+            0: { cellWidth: 34, fontStyle: 'bold', fontSize: 8 },
+            1: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' },
+            2: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' },
+            3: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' },
+            4: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' },
+            5: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' },
+            6: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' },
+            7: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' },
+            8: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' },
+            9: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' },
+            10: { cellWidth: 23.5, fontSize: 7.5, halign: 'center' }
+        },
+        styles: { cellPadding: 2.5, overflow: 'linebreak' },
+        margin: { left: 14, right: 14 },
+        pageBreak: 'auto',
+        rowPageBreak: 'avoid'
+    });
+
+    yPos = doc.lastAutoTable.finalY + 6;
+
+    // Comments & Observations
+    const allComments = [];
+    const structSections = [
+        { id: 'TACTILE', label: 'Tactile' },
+        { id: 'VESTIBULAR', label: 'Vestibular' },
+        { id: 'PROPRIOCEPTION', label: 'Proprioception' },
+        { id: 'AUDITORY', label: 'Auditory' },
+        { id: 'VISUAL', label: 'Visual' },
+        { id: 'GENERAL REACTIONS', label: 'General Reactions' }
     ];
 
-    sectionsToRender.forEach(sec => {
-        if (yPos > 240) {
-            doc.addPage();
-            yPos = 20;
-        }
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.text(sec.title, 14, yPos);
-        yPos += 5;
-
-        // Build table body from categories in this section
-        const categories = INTERPRETATION_CATEGORIES[sec.id] || [];
-        const tableBody = [];
-
-        categories.forEach(cat => {
-            const triggeredIds = matrix[sec.id] && matrix[sec.id][cat.id] ? matrix[sec.id][cat.id] : [];
-            const displayVal = triggeredIds.length > 0 ? triggeredIds.join(', ') : 'None';
-            tableBody.push([
-                cat.label,
-                displayVal
-            ]);
-        });
-
-        // Add Section Comments if any are present
-        const sectionComments = [];
+    structSections.forEach(sec => {
         const structSec = ASSESSMENT_STRUCTURE.find(s => s.id === sec.id);
         if (structSec) {
+            const secComments = [];
             structSec.subsections.forEach(sub => {
                 const commentKey = `${sec.id}_${sub.id}_Comments`;
                 const val = assessmentData[commentKey];
                 if (val && val.trim() !== '') {
-                    sectionComments.push(`${sub.title}: ${val.trim()}`);
+                    secComments.push(`${sub.title}: ${val.trim()}`);
                 }
             });
+            if (secComments.length > 0) {
+                allComments.push(`${sec.label} Comments:\n- ${secComments.join('\n- ')}`);
+            }
         }
-        
-        if (sectionComments.length > 0) {
-            tableBody.push([
-                {
-                    content: `Section Comments:\n${sectionComments.join('\n')}`,
-                    colSpan: 2,
-                    styles: { fontStyle: 'italic', fillColor: [248, 249, 250], halign: 'left' }
-                }
-            ]);
-        }
-
-        doc.autoTable({
-            startY: yPos,
-            head: [['Interpretation Category', 'Triggered Question IDs']],
-            body: tableBody,
-            theme: 'grid',
-            headStyles: { fillColor: [13, 27, 42], textColor: 255 },
-            columnStyles: {
-                0: { cellWidth: 60, fontStyle: 'bold' },
-                1: { cellWidth: 120, overflow: 'linebreak' }
-            },
-            styles: { fontSize: 9, cellPadding: 4, overflow: 'linebreak' },
-            margin: { left: 14, right: 14 },
-            pageBreak: 'auto',
-            rowPageBreak: 'avoid'
-        });
-
-        yPos = doc.lastAutoTable.finalY + 8;
     });
 
+    if (allComments.length > 0) {
+        if (yPos > 155) {
+            doc.addPage();
+            yPos = 20;
+        }
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('SECTION COMMENTS & OBSERVATIONS:', 14, yPos);
+        yPos += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        const commentsText = allComments.join('\n\n');
+        const splitComments = doc.splitTextToSize(commentsText, 269);
+        doc.text(splitComments, 14, yPos);
+        yPos += (splitComments.length * 4) + 6;
+    }
+
     // Clinical Remarks and Therapist Signature Area
-    if (yPos > 220) {
+    if (yPos > 150) {
         doc.addPage();
         yPos = 20;
     }
 
-    yPos += 5;
-    doc.line(14, yPos, 196, yPos);
-    yPos += 8;
+    doc.setLineWidth(0.4);
+    doc.line(14, yPos, 283, yPos);
+    yPos += 6;
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
+    doc.setFontSize(10);
     doc.text('CLINICAL REMARKS & RECOMMENDATIONS:', 14, yPos);
-    yPos += 8;
+    yPos += 5;
     doc.setFont('helvetica', 'normal');
-    doc.rect(14, yPos, 182, 25); // Draw a box for remarks
-    yPos += 35;
+    doc.rect(14, yPos, 269, 18); // remarks box
+    yPos += 24;
 
-    if (yPos > 250) {
+    if (yPos > 180) {
         doc.addPage();
         yPos = 20;
     }
 
     doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
     doc.text('Therapist Signature:', 14, yPos);
-    doc.text('Date:', 140, yPos);
-    yPos += 15;
-    doc.line(14, yPos, 70, yPos); // Signature line
-    doc.line(140, yPos, 180, yPos); // Date line
-    yPos += 5;
+    doc.text('Date:', 200, yPos);
+    yPos += 10;
+    doc.line(14, yPos, 80, yPos); // signature line
+    doc.line(200, yPos, 260, yPos); // date line
+    yPos += 4;
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.text('Occupational Therapist', 14, yPos);
 
     // Add page numbers footer dynamically
@@ -180,7 +231,7 @@ export const generatePDF = (patientInfo, assessmentData) => {
         doc.setPage(i);
         doc.setFont('helvetica', 'italic');
         doc.setFontSize(8);
-        doc.text(`Page ${i} of ${pageCount}`, 105, 287, { align: 'center' });
+        doc.text(`Page ${i} of ${pageCount}`, 148.5, 202, { align: 'center' });
     }
 
     return doc;
